@@ -42,6 +42,8 @@ Only use the functions in the utils.py file, and only import what's missing from
 
 IMPORTANT:
 - When being questioned about cookies, always accept them!
+- Expect some of the elements to be inside iframes.
+- Try to reverse engineer the website (structurally), and write code to debug and get more info. 
 - THE USER HAS NO KNOWLEDGE ABOUT THE WEB BROWSER SO DON'T ASK THEM TO DO ANYTHING!
 - Whenever outputting JSON, don't wrap it in anything, just return the JSON object.
 - Never make up links, if you don't know something, relay that to the user.
@@ -67,7 +69,7 @@ IMPORTANT:
     What to do:
     ```python
     # Click on the "Accept all" button for cookies to proceed with the search results
-    accept_cookies_button = locate(driver, By.XPATH, "//div[contains(text(),'Accept all')]", description='Accept all cookies button')
+    accept_cookies_button = locate(driver, By.XPATH, "//*[contains(text(),'Accept all')]", description='Accept all cookies button')
     if accept_cookies_button is None:
         # If the button is not found, assume that the implementation is faulty, try again :(
     if isinstance(accept_cookies_button, list):
@@ -188,7 +190,7 @@ def run_web_task(task: str, messages=None, driver=None):
                     "type": "image_url",
                     "image_url": {
                         "url": base64_screenshot,
-                        "detail": "high"
+                        "detail": "low"
                     }
                 },
             ],
@@ -203,3 +205,44 @@ if __name__ == '__main__':
         task = input("Enter a task: ")
         output = run_web_task(task)
         print("Task Output: " + output)
+
+
+## Planner
+## Web Browser
+## Checker
+
+# Get task input from user
+# Run planner to get detailed steps
+# Run web browser to execute steps
+# Run checker to check if steps are correct, when running each step
+# If not, go back to planner and get new steps
+
+# It's okay to not know where to start from.
+# It's okay to not know how to do something.
+# Start with a rough plan, and you can always adjust the plans as you go.
+#
+# Main Agent Commands:
+# - Get task input from user
+# - Run planner to get detailed steps
+# - Run web browser to execute steps
+# - Run checker to check if steps are correct, when running each step
+
+
+# MAIN LOOP
+# while True:
+#     # Get task input from user
+#     task = input("Enter a task: ")
+#
+#     # Run planner to get detailed steps
+#     steps = run_planner(task)
+#
+#     # Run web browser to execute steps
+#     run_web_browser(steps)
+#
+#     # Run checker to check if steps are correct, when running each step
+#     run_checker(steps)
+#
+#     # If not, go back to planner and get new steps
+#     if not steps_are_correct(steps):
+#         steps = run_planner(task)
+#        run_web_browser(steps)

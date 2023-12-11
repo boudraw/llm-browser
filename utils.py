@@ -6,25 +6,53 @@ from selenium.webdriver.common.keys import Keys
 import time
 
 
+def scroll_offset(driver, offset):
+    # Adjust from current scroll position
+    scroll_y = driver.execute_script("return window.scrollY")
+    # Use JavaScript to scroll to the adjusted position
+    driver.execute_script(f"window.scrollTo(0, {scroll_y + offset});")
+    return True
+
+
 def scroll_down_half_page(driver):
     # Get the screen height using JavaScript and divide it by 2
     screen_height = driver.execute_script("return window.innerHeight") // 2
+    scroll_offset(driver, screen_height)
+    return True
 
-    # Use JavaScript to scroll to the adjusted position
-    # Adjust from current scroll position
-    scroll_y = driver.execute_script("return window.scrollY")
-    driver.execute_script(f"window.scrollTo(0, {scroll_y + screen_height});")
+
+def scroll_down_page(driver):
+    # Get the screen height using JavaScript and divide it by 2
+    screen_height = driver.execute_script("return window.innerHeight")
+    scroll_offset(driver, screen_height)
     return True
 
 
 def scroll_up_half_page(driver):
     # Get the screen height using JavaScript and divide it by 2
     screen_height = driver.execute_script("return window.innerHeight") // 2
+    scroll_offset(driver, -screen_height)
+    return True
 
-    # Adjust from current scroll position
-    # Use JavaScript to scroll to the adjusted position
-    scroll_y = driver.execute_script("return window.scrollY")
-    driver.execute_script(f"window.scrollTo(0, {scroll_y - screen_height});")
+
+def scroll_up_page(driver):
+    # Get the screen height using JavaScript and divide it by 2
+    screen_height = driver.execute_script("return window.innerHeight")
+    scroll_offset(driver, -screen_height)
+    return True
+
+
+def scroll_to_bottom(driver):
+    # Get the screen height using JavaScript and divide it by 2
+    screen_height = driver.execute_script("return window.innerHeight")
+    scroll_offset(driver, screen_height)
+    return True
+
+
+def scroll_to_top(driver):
+    # Get the screen height using JavaScript and divide it by 2
+    screen_height = driver.execute_script("return window.innerHeight")
+    scroll_offset(driver, -screen_height)
     return True
 
 
