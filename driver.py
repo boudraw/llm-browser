@@ -1,12 +1,50 @@
 import time, logging
 from webdriver_manager.chrome import ChromeDriverManager
 from seleniumwire.webdriver import Chrome as SW_Chrome
-import datetime
 from env import PROXY_USERNAME, PROXY_PASSWORD, PROXY_HOST, PROXY_PORT, HEADLESS
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.core.driver_cache import DriverCacheManager
-import platform
+import platform, base64
+import os
+
+
+def get_chrome_profile_dir():
+    # Determine the OS
+    if os.name == 'nt':  # Windows
+        base_path = os.path.join(os.environ['LOCALAPPDATA'], 'Google', 'Chrome', 'User Data')
+    elif os.name == 'posix':  # macOS or Linux
+        if os.uname().sysname == 'Darwin':  # macOS
+            base_path = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'Google', 'Chrome')
+        else:  # Linux
+            base_path = os.path.join(os.path.expanduser('~'), '.config', 'google-chrome')
+    else:
+        raise Exception("Unsupported operating system")
+
+    # Check if the base path exists
+    if not os.path.exists(base_path):
+        raise Exception("Chrome User Data directory not found")
+
+    # Return the base path where the profiles are stored
+    return base_path
+
+
+def get_chrome_profiles(user_data_dir):
+    profiles = []
+    for name in os.listdir(user_data_dir):
+        if name.startswith('Profile') or name == 'Default':
+            profile_dir = os.path.join(user_data_dir, name)
+            if os.path.isdir(profile_dir):
+                profiles.append(name)
+    return profiles
+
+
+def get_first_chrome_profile(user_data_dir):
+    profiles = get_chrome_profiles(user_data_dir)
+    if profiles:
+        return profiles[1]
+    else:
+        raise Exception("No Chrome profiles found")
 
 
 def chrome_proxy() -> dict:
@@ -43,13 +81,20 @@ def create_driver(initial_url: str):
     max_retries = 3
     retries = 0
 
-    driver_id = f"{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+    driver_id = str(int(time.time()))
     op = webdriver.ChromeOptions()
     op.page_load_strategy = 'eager'
     chrome_prefs = {}
     chrome_prefs["profile.default_content_settings"] = {"images": 2}
     op.experimental_options["prefs"] = chrome_prefs
     op.add_argument("--log-level=3")
+
+    # Use the first profile found
+    # chrome_user_data_dir = get_chrome_profile_dir()
+    # first_profile = get_first_chrome_profile(chrome_user_data_dir)
+    #
+    # op.add_argument(f"user-data-dir={chrome_user_data_dir}")
+    # op.add_argument(f"profile-directory={first_profile}")
 
     if HEADLESS:
         op.headless = True
@@ -65,7 +110,7 @@ def create_driver(initial_url: str):
         op.add_argument('--disable-dev-shm-usage')
         op.add_argument("--disable-browser-side-navigation")
 
-    logging.info("DRIVER INFO: Creating driver with URL " + initial_url)
+    logging.debug("DRIVER INFO: Creating driver with URL " + initial_url)
 
     while retries < max_retries:
         try:
@@ -95,12 +140,12 @@ def create_driver(initial_url: str):
             if end_time - start_time > 20:
                 raise Exception("Connection too slow")
 
-            logging.info("Connection established in " + str(end_time - start_time) + " seconds")
+            logging.debug("Connection established in " + str(end_time - start_time) + " seconds")
             # If we got here, the connection is good
-            return driver_id, driver
+            return driver
 
         except Exception:
-            logging.warning("Could not initialise driver, retrying...", exc_info=True)
+            logging.warn("Could not initialise driver, retrying...", exc_info=True)
             retries += 1
             try:
                 driver.quit()  # Close the driver instance
@@ -109,3 +154,12 @@ def create_driver(initial_url: str):
 
     logging.error('Max retries reached. Cannot establish a good connection.')
     return False, False
+
+
+def get_screenshot_base64(driver):
+    time.sleep(1)
+    screenshot_path = "screenshot.png"
+    driver.save_screenshot(screenshot_path)
+    with open(screenshot_path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+    return f"data:image/png;base64,{encoded_string}"

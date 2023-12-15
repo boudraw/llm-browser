@@ -2,8 +2,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.keys import Keys
 import time
+from html_utils import create_xpath_selector_from_description
 
 
 def scroll_offset(driver, offset):
@@ -118,6 +118,12 @@ def click_on_coords(driver, x, y):
     driver.execute_script(f"window.scrollTo({x}, {y});")
     driver.execute_script(f"document.elementFromPoint({x}, {y}).click();")
     return True
+
+
+# def locate_element_using_natural_language(driver, description):
+#     xpath_selector = create_xpath_selector_from_description(driver, description)
+#     element = locate(driver, By.XPATH, xpath_selector, description=description)
+#     return element
 
 
 def run_code(driver, code):
