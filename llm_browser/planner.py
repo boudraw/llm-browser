@@ -1,9 +1,9 @@
-from env import client
+from llm_browser.env import client
 import json
 
 
 def generate_steps(task: str, messages=None):
-    STEPS_PROMPT = """You are a world-renowned business PHD professor at Stanford.
+    STEPS_PROMPT = """You are a world-renowned business professor at Stanford.
 You will be given a question or task, and your job is to generate a JSON of the steps needed to reach the end goal.
 
 You have access to a Selenium python instance where you can write code, and thus, the entire internet.
@@ -35,7 +35,7 @@ An example conversation is shown below:
     response = client.chat.completions.create(
         model="gpt-4-1106-preview",
         temperature=0,
-        top_p=1,
+        top_p=0.95,
         max_tokens=1024,
         response_format={"type": "json_object"},
         messages=messages
@@ -43,6 +43,8 @@ An example conversation is shown below:
     message = response.choices[0].message.content
     return list(json.loads(message).values())
 
+
+# TODO: Fix user asking for JSON output causing an infinite loop of messages
 
 def generate_task_from_steps(step: str, task: str):
     return f"""Task: {task}\nCurrent Step: {step}"""

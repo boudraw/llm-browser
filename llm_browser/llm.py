@@ -1,12 +1,14 @@
-import json, logging
-from env import client, DEBUG
-from utils import run_code
-from driver import create_driver, get_screenshot_base64
-from checker import check_if_stuck
+import json, logging, os
+from llm_browser.env import client
+from llm_browser.utils import run_code
+from llm_browser.driver import create_driver, get_screenshot_base64
+from llm_browser.checker import check_if_stuck
 
 
 def get_utils_code():
-    utils_code = open("./utils.py", "r")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    utils_filepath = os.path.join(current_dir, "utils.py")
+    utils_code = open(utils_filepath, "r")
     return utils_code.read()
 
 
@@ -143,13 +145,17 @@ def run_web_task(task: str, messages=None, driver=None, counter=0):
 
     screenshot_msg = [
         {
-            "role": "assistant",
+            "role": "user",
             "content": [
+                {
+                    "type": "text",
+                    "text": "The next section is the latest visual state of the browser, taken from a screenshot!"
+                },
                 {
                     "type": "image_url",
                     "image_url": {
                         "url": base64_screenshot,
-                        "detail": "high"
+                        "detail": "low"
                     }
                 },
             ],
@@ -162,40 +168,22 @@ def run_web_task(task: str, messages=None, driver=None, counter=0):
         logging.debug("Checking if the AI is stuck...")
         is_stuck, stuck_msg = check_if_stuck(most_recent_messages)
         if is_stuck:
-            # messages.append(
-            #     {
-            #         "role": "assistant",
-            #         "content": [
-            #             {"type": "text", "text": stuck_msg},
-            #         ],
-            #     }
-            # )
-            # human_input = input(stuck_msg+"\n: ")
-            # messages.append(
-            #     {
-            #         "role": "user",
-            #         "content": [
-            #             {"type": "text", "text": human_input},
-            #         ],
-            #     }
-            # )
+            logging.warn(stuck_msg)
             return run_web_task(task, [], driver, counter+1)
         else:
             logging.debug("AI is not stuck!")
 
-    if DEBUG:
-        logging.debug("Running LLM Query...")
+    logging.debug("Running LLM Query...")
     response = client.chat.completions.create(
         model="gpt-4-vision-preview",
         temperature=0,
-        top_p=1,
+        top_p=0.95,
         max_tokens=4096,
         messages=system_messages+most_recent_messages+screenshot_msg
     )
     message = response.choices[0].message.content
 
-    if DEBUG:
-        logging.debug("LLM Response: " + message)
+    logging.debug("LLM Response: " + message)
 
     # Try to parse JSON
     try:

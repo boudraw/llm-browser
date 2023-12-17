@@ -1,50 +1,11 @@
 import time, logging
 from webdriver_manager.chrome import ChromeDriverManager
 from seleniumwire.webdriver import Chrome as SW_Chrome
-from env import PROXY_USERNAME, PROXY_PASSWORD, PROXY_HOST, PROXY_PORT, HEADLESS
+from llm_browser.env import PROXY_USERNAME, PROXY_PASSWORD, PROXY_HOST, PROXY_PORT, HEADLESS
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.core.driver_cache import DriverCacheManager
 import platform, base64
-import os
-
-
-def get_chrome_profile_dir():
-    # Determine the OS
-    if os.name == 'nt':  # Windows
-        base_path = os.path.join(os.environ['LOCALAPPDATA'], 'Google', 'Chrome', 'User Data')
-    elif os.name == 'posix':  # macOS or Linux
-        if os.uname().sysname == 'Darwin':  # macOS
-            base_path = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'Google', 'Chrome')
-        else:  # Linux
-            base_path = os.path.join(os.path.expanduser('~'), '.config', 'google-chrome')
-    else:
-        raise Exception("Unsupported operating system")
-
-    # Check if the base path exists
-    if not os.path.exists(base_path):
-        raise Exception("Chrome User Data directory not found")
-
-    # Return the base path where the profiles are stored
-    return base_path
-
-
-def get_chrome_profiles(user_data_dir):
-    profiles = []
-    for name in os.listdir(user_data_dir):
-        if name.startswith('Profile') or name == 'Default':
-            profile_dir = os.path.join(user_data_dir, name)
-            if os.path.isdir(profile_dir):
-                profiles.append(name)
-    return profiles
-
-
-def get_first_chrome_profile(user_data_dir):
-    profiles = get_chrome_profiles(user_data_dir)
-    if profiles:
-        return profiles[1]
-    else:
-        raise Exception("No Chrome profiles found")
 
 
 def chrome_proxy() -> dict:
@@ -136,8 +97,8 @@ def create_driver(initial_url: str):
             driver.get(initial_url)
             end_time = time.time()
 
-            # If the page took more than 20 seconds to load, retry
-            if end_time - start_time > 20:
+            # If the page took more than 10 seconds to load, retry
+            if end_time - start_time > 10:
                 raise Exception("Connection too slow")
 
             logging.debug("Connection established in " + str(end_time - start_time) + " seconds")

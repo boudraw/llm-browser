@@ -1,6 +1,6 @@
-from env import client
-from planner import generate_task_from_steps
-from driver import get_screenshot_base64
+from llm_browser.env import client
+from llm_browser.planner import generate_task_from_steps
+from llm_browser.driver import get_screenshot_base64
 import json
 
 
@@ -13,6 +13,9 @@ Your job is QA.
 You take in a screenshot of the website, the general goal, the plan, and the current step.
 You output whether the current step is correct or not.
 You also output whether the plan is fully finished preemptively or not.
+It is extremely important that you do compare the screenshot,
+with the goal & current step to cross determine if the current step is correct or not,
+and whether we've found what we're looking for.
 
 Output a JSON object like the following:
 ```json
@@ -38,7 +41,7 @@ If the plan is finished;
                     "type": "image_url",
                     "image_url": {
                         "url": base64_screenshot,
-                        "detail": "high"
+                        "detail": "low"
                     }
                 },
             ],
@@ -53,7 +56,7 @@ If the plan is finished;
     response = client.chat.completions.create(
         model="gpt-4-vision-preview",
         temperature=0,
-        top_p=1,
+        top_p=0.95,
         max_tokens=4096,
         messages=messages
     )
@@ -74,7 +77,7 @@ YOU SHOULD AVOID FLAGGING THE BROWSER AS STUCK UNLESS YOU ARE CERTAIN THAT IT IS
 
 is_stuck (Boolean): Indicates whether the browser is stuck.
 stuck_message (String): Provides a helpful message to the user in case the browser is stuck.
-This message should offer guidance and a suggested action to assist in resolving the issue.
+This message should offer explanations for why the browser is stuck, and provide potential alternatives/solutions.
 It is crucial that your responses remain general and do not reveal any underlying AI or specific technologies like Selenium.
 Your communications should be framed as seeking user assistance in a situation where you are unable to proceed.
 
@@ -94,7 +97,7 @@ When not stuck: {"is_stuck": false, "stuck_message": null}
     response = client.chat.completions.create(
         model="gpt-4-1106-preview",
         temperature=0,
-        top_p=1,
+        top_p=0.95,
         max_tokens=4096,
         response_format={"type": "json_object"},
         messages=messages

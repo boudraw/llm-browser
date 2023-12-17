@@ -1,40 +1,7 @@
-import typer
-from llm import run_web_task
-from planner import generate_steps, generate_task_from_steps
-from checker import check_plan_step
-from driver import create_driver
+from llm_browser.llm import run_web_task
+from llm_browser.planner import generate_steps, generate_task_from_steps
+from llm_browser.checker import check_plan_step
 import logging
-
-app = typer.Typer()
-
-
-@app.command()
-def browse():
-    driver = create_driver("https://google.com")
-    messages = []
-    task = typer.prompt("Hey there! How can I help?\n")
-    messages.append({
-        "role": "user",
-        "content": [
-            {"type": "text", "text": task},
-        ]
-    })
-    while True:
-        response = complete_browsing_task(driver, task, messages)
-        messages.append({
-            "role": "assistant",
-            "content": [
-                {"type": "text", "text": response},
-            ]
-        })
-
-        task = input(response+"\n: ")
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": task},
-            ]
-        })
 
 
 def complete_browsing_task(driver, task: str, messages=None):
@@ -80,15 +47,3 @@ def complete_browsing_task(driver, task: str, messages=None):
         else:
             del steps[0]
 
-
-if __name__ == "__main__":
-    # Configure logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler("cli.log"),
-            logging.StreamHandler()
-        ]
-    )
-    app()
