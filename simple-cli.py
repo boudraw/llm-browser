@@ -58,7 +58,7 @@ if __name__ == "__main__":
         ]
     )
     openai, anthropic = create_providers()
-    embedding_memory = EmbeddingMemory("test", env("PINECONE_API_KEY", None))
+    embedding_memory = EmbeddingMemory("llm-browser", env("PINECONE_API_KEY", None))
     if not embedding_memory:
         exit("Please set PINECONE_API_KEY in your environment variables.")
 

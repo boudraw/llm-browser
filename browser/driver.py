@@ -1,7 +1,7 @@
 import time, logging
 from webdriver_manager.chrome import ChromeDriverManager
 from seleniumwire.webdriver import Chrome as SW_Chrome
-from llm_browser.env import PROXY_USERNAME, PROXY_PASSWORD, PROXY_HOST, PROXY_PORT, HEADLESS
+from browser.env import PROXY_USERNAME, PROXY_PASSWORD, PROXY_HOST, PROXY_PORT, HEADLESS
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.core.driver_cache import DriverCacheManager

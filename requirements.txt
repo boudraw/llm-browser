@@ -1,4 +1,4 @@
-openai==1.5.0
+openai==1.14.1
 selenium==4.16.0
 selenium-wire==5.1.0
 webdriver-manager==4.0.1
@@ -6,3 +6,8 @@ environs==10.0.0
 beautifulsoup4==4.12.2
 Pillow==10.1.0
 tiktoken==0.5.2
+anthropic==0.20.0
+pinecone-client==3.1.0
+pymongo==4.6.2
+markdownify==0.11.6
+markdown==3.6

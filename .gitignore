@@ -160,3 +160,4 @@ cython_debug/
 .idea/
 screenshot.png
 screenshot.jpeg
+.env
